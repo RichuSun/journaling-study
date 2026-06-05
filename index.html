@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Adaptive Digital Journaling</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <h1>Adaptive Digital Journaling</h1>
+        <p>A local-storage journaling prototype for everyday study-life reflection</p>
+      </div>
+      <nav>
+        <button class="nav-btn active" data-page="home">Home</button>
+        <button class="nav-btn" data-page="checkin">Start Entry</button>
+        <button class="nav-btn" data-page="history">History</button>
+      </nav>
+    </header>
+
+    <main>
+      <section id="home" class="page active">
+        <div class="notice">
+          Prototype notice: This is not monitored live and does not provide emergency or mental health support.
+          Please avoid real names, addresses, phone numbers, or identifiable details.
+        </div>
+
+        <div class="card">
+          <h2>Welcome</h2>
+          <p>
+            This prototype helps students choose a journaling mode based on their current study-life state.
+            It explores whether adaptive prompts can match students’ daily states, support their journaling needs,
+            and guide everyday self-reflection in a more situated way.
+          </p>
+        </div>
+
+        <div class="grid three">
+          <div class="card mode-card">
+            <h3>Quick Reflection</h3>
+            <p>A short, low-burden mode for high-pressure or low-energy days.</p>
+          </div>
+          <div class="card mode-card">
+            <h3>Brief Reflection</h3>
+            <p>A medium-depth mode for connecting an event with feelings or study state.</p>
+          </div>
+          <div class="card mode-card">
+            <h3>Guided Reflection</h3>
+            <p>A deeper mode for complex emotions, meaningful events, and future intentions.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>How it works</h2>
+          <ol>
+            <li>Complete a short daily check-in.</li>
+            <li>Receive a suggested journaling mode.</li>
+            <li>Accept or switch the mode.</li>
+            <li>Write a journal entry using separate prompt boxes.</li>
+            <li>Review previous entries, hide entries if needed, and add later reflection.</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <h2>Participant setup</h2>
+          <p>
+            Enter the participant ID the researcher gave you. It identifies your entries on this device.
+            You do not need an account or password.
+          </p>
+          <label>Your Participant ID
+            <input id="setupParticipantId" type="text" placeholder="e.g., P01" />
+          </label>
+          <div class="button-row">
+            <button id="saveParticipantIdBtn" class="primary">Save Participant ID</button>
+            <button id="resetParticipantBtn" class="small-button" style="display:none;">Not you? Reset this device</button>
+          </div>
+          <p id="currentParticipantText" class="muted"></p>
+          <p class="muted">
+            Please use the <strong>same browser on the same device</strong> every day. Avoid private/incognito
+            mode and do not clear your browsing data, or your saved history on this device may be lost.
+            Your journal stays on this device; only research metadata is sent to the researcher.
+          </p>
+        </div>
+
+      </section>
+
+      <section id="checkin" class="page">
+        <div class="notice">
+          Your journal text is stored locally in this browser for your own review and is never uploaded.
+          Only research metadata (such as your check-in ratings, selected mode, and feedback) is sent to the researcher’s secure Google Sheet.
+        </div>
+
+        <div class="card">
+          <h2>Today’s Check-in</h2>
+          <p>Answer a few short questions about your current or recent study-life state.</p>
+
+          <label>Participant ID
+            <input id="participantId" type="text" readonly />
+          </label>
+
+          <label>Mood label / emoji *
+            <select id="mood">
+              <option value="🙂 Calm">🙂 Calm</option>
+              <option value="😌 Relaxed">😌 Relaxed</option>
+              <option value="😐 Neutral">😐 Neutral</option>
+              <option value="😟 Worried">😟 Worried</option>
+              <option value="😣 Stressed">😣 Stressed</option>
+              <option value="😴 Tired">😴 Tired</option>
+              <option value="😵‍💫 Overloaded">😵‍💫 Overloaded</option>
+              <option value="😢 Sad">😢 Sad</option>
+              <option value="😡 Angry">😡 Angry</option>
+              <option value="✨ Positive">✨ Positive</option>
+            </select>
+          </label>
+
+          <div class="slider-group">
+            <label>Today’s workload: <span id="workloadVal">3</span>
+              <input id="workload" type="range" min="1" max="5" value="3" />
+              <small>1 = very low, 5 = very high</small>
+            </label>
+            <label>Time pressure: <span id="timePressureVal">3</span>
+              <input id="timePressure" type="range" min="1" max="5" value="3" />
+              <small>1 = very low, 5 = very high</small>
+            </label>
+            <label>Reflective energy: <span id="reflectiveEnergyVal">3</span>
+              <input id="reflectiveEnergy" type="range" min="1" max="5" value="3" />
+              <small>1 = very low, 5 = very high</small>
+            </label>
+            <label>Emotional complexity: <span id="emotionalComplexityVal">3</span>
+              <input id="emotionalComplexity" type="range" min="1" max="5" value="3" />
+              <small>1 = simple/clear, 5 = complex/mixed</small>
+            </label>
+          </div>
+
+          <fieldset>
+            <legend>Is there one event you want to reflect on?</legend>
+            <label class="radio-inline"><input type="radio" name="eventFlag" value="No" checked /> No</label>
+            <label class="radio-inline"><input type="radio" name="eventFlag" value="Yes" /> Yes</label>
+          </fieldset>
+
+          <label>Optional keyword for this event
+            <input id="eventKeyword" type="text" placeholder="e.g., deadline, feedback, meeting" />
+          </label>
+
+          <button id="getModeBtn" class="primary">Get suggested mode</button>
+        </div>
+      </section>
+
+      <section id="mode" class="page">
+        <div class="card">
+          <h2>Suggested Mode</h2>
+          <p id="suggestedModeText"></p>
+          <p class="muted" id="suggestedModeCaption"></p>
+        </div>
+
+        <div class="card">
+          <h2>Choose your mode</h2>
+          <p>You can accept the suggestion or switch to a different mode.</p>
+
+          <div class="mode-options" id="modeOptions"></div>
+
+          <button id="continueJournalBtn" class="primary">Continue to journal space</button>
+        </div>
+      </section>
+
+      <section id="journal" class="page">
+        <div class="notice">
+          Answer each prompt separately. Your journal text is saved locally in this browser for your own review only —
+          it is never uploaded or seen by the researcher. Only your feedback ratings and written feedback about the
+          experience are sent as research metadata.
+        </div>
+
+        <div class="card">
+          <h2>Journal Space</h2>
+          <p id="journalModeText"></p>
+          <div id="promptContainer"></div>
+
+          <label>Anything else you want to record today? (optional)
+            <textarea id="extraNote" placeholder="Optional: use this space for anything that did not fit the prompts above."></textarea>
+          </label>
+        </div>
+
+        <div class="card">
+          <h2>Post-session reflection</h2>
+          <div class="slider-group">
+            <label>Did the selected mode fit your state today? <span id="fitVal">3</span>
+              <input id="fitRating" type="range" min="1" max="5" value="3" />
+            </label>
+            <label>How burdensome did this journaling task feel? <span id="burdenVal">3</span>
+              <input id="burdenRating" type="range" min="1" max="5" value="3" />
+            </label>
+            <label>Did this session help you reflect? <span id="reflectiveValueVal">3</span>
+              <input id="reflectiveValueRating" type="range" min="1" max="5" value="3" />
+            </label>
+          </div>
+
+          <label>Optional feedback about this journaling experience
+            <textarea id="openFeedback"></textarea>
+          </label>
+
+          <button id="saveEntryBtn" class="primary">Save today’s entry</button>
+        </div>
+      </section>
+
+      <section id="history" class="page">
+        <div class="notice">
+          This history is stored locally in this browser. If you clear browser data or use another device, it may not appear there.
+        </div>
+
+        <div class="card">
+          <h2>My History</h2>
+          <div id="historyList"></div>
+        </div>
+
+        <div class="card" id="laterReflectionCard">
+          <h2>Later reflection</h2>
+          <p>Choose one saved entry to revisit, then add a short reflection based on what you notice now.</p>
+
+          <label>Select an entry to revisit
+            <select id="entryToRevisit"></select>
+          </label>
+
+          <div id="selectedEntryPreview" class="entry-preview"></div>
+
+          <label>What do you notice from your recent entries?
+            <select id="noticedPattern">
+              <option>My workload has been high</option>
+              <option>My emotions changed a lot</option>
+              <option>One topic keeps appearing</option>
+              <option>I handled something better than expected</option>
+              <option>I am not sure yet</option>
+              <option>Other</option>
+            </select>
+          </label>
+
+          <label>Do you have any new thoughts or insights after revisiting this entry?
+            <textarea id="newInsights"></textarea>
+          </label>
+
+          <label>Is there one small thing you want to keep, change, or try next?
+            <textarea id="nextStep"></textarea>
+          </label>
+
+          <button id="saveReviewBtn" class="primary">Save review reflection</button>
+
+          <div id="reviewHistoryList" class="review-history"></div>
+        </div>
+
+        <div class="card">
+          <h2>Research metadata</h2>
+          <p>
+            When you save an entry, a later reflection, or hide/unhide an entry, the
+            <strong>research metadata</strong> for that action is sent to the researcher’s
+            secure Google Sheet. This includes your participant ID, check-in ratings, mood
+            label, selected mode, entry length, feedback ratings, your written feedback about
+            the experience, later-reflection notes, and hide/unhide actions.
+          </p>
+          <p>
+            Your <strong>raw journal text</strong> (your answers to the journaling prompts and
+            the optional extra note) is <strong>never uploaded</strong>. It stays only in this browser.
+          </p>
+
+          <p id="syncStatus" class="muted sync-status"></p>
+          <div class="button-row">
+            <button id="retrySyncBtn">Retry upload now</button>
+          </div>
+
+          <h3>Offline backup (optional)</h3>
+          <p class="muted">
+            You can also download your own copy of the same metadata as CSV files. This is a backup
+            and is only needed if asked by the researcher.
+          </p>
+          <div class="button-row">
+            <button id="downloadMyMetadataBtn">Download my daily metadata CSV</button>
+            <button id="downloadMyReviewsBtn">Download my review reflections CSV</button>
+            <button id="downloadMyVisibilityBtn">Download my hide/unhide log CSV</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="celebrationOverlay" class="celebration-overlay" aria-hidden="true"></div>
+  <script src="script.js"></script>
+</body>
+</html>
