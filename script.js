@@ -39,14 +39,38 @@ const participantKey = "adaptive_journaling_participant_id_v1";
 // can restrict which IDs are accepted (prevents typos and accidental clashes).
 // ---------------------------------------------------------------------------
 const PARTICIPANT_CONFIG = {
-  // Optional allowlist of the IDs you hand out. Leave as [] to accept any ID.
-  // Example: allowedIds: ["P01", "P02", "P03", "P04", "P05"]
-  allowedIds: []
+  // The IDs you hand out to participants. Add/remove lines to match how many
+  // people you recruit. Leave as [] to accept any typed ID (no checking).
+  allowedIds: ["P01", "P02", "P03", "P04", "P05", "P06", "P07", "P08", "P09", "P10"]
 };
 
-function isAllowedParticipantId(id) {
-  if (!PARTICIPANT_CONFIG.allowedIds || PARTICIPANT_CONFIG.allowedIds.length === 0) return true;
-  return PARTICIPANT_CONFIG.allowedIds.includes(id);
+// Reduces an ID to a comparison key that ignores case, spaces, and leading zeros,
+// e.g. "P01", "p01", "P1", " p1 ", "P001" all become "p1". Returns null if the
+// value is not in the simple "letters + number" shape.
+function normalizeIdKey(id) {
+  const m = String(id || "").trim().toLowerCase().match(/^([a-z]*)\s*0*(\d+)$/);
+  return m ? m[1] + m[2] : null;
+}
+
+// Returns the canonical ID from the allowlist (matching case/space/leading-zero
+// insensitively), or null if the typed value is not on the list. If the list is
+// empty, the typed value is accepted as-is.
+function canonicalParticipantId(input) {
+  const value = String(input || "").trim();
+  if (!value) return null;
+  if (!PARTICIPANT_CONFIG.allowedIds || PARTICIPANT_CONFIG.allowedIds.length === 0) {
+    return value;
+  }
+  const key = normalizeIdKey(value);
+  if (key !== null) {
+    const match = PARTICIPANT_CONFIG.allowedIds.find(id => normalizeIdKey(id) === key);
+    if (match) return match;
+  }
+  // Fallback: exact (case-insensitive) match for any non-standard IDs.
+  const exact = PARTICIPANT_CONFIG.allowedIds.find(
+    id => id.toLowerCase() === value.toLowerCase()
+  );
+  return exact || null;
 }
 
 // ---------------------------------------------------------------------------
@@ -236,13 +260,14 @@ document.getElementById("saveParticipantIdBtn").addEventListener("click", () => 
     alert("Please enter a participant ID.");
     return;
   }
-  if (!isAllowedParticipantId(value)) {
+  const canonical = canonicalParticipantId(value);
+  if (!canonical) {
     alert("This participant ID is not recognised. Please enter exactly the ID the researcher gave you.");
     return;
   }
-  setParticipantId(value);
+  setParticipantId(canonical);
   updateParticipantUI();
-  alert(`This device is now set up for participant ${value}. Please use the same browser and device each day.`);
+  alert(`This device is now set up for participant ${canonical}. Please use the same browser and device each day.`);
 });
 
 const resetParticipantBtn = document.getElementById("resetParticipantBtn");
