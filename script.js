@@ -742,7 +742,7 @@ function handleReviewAction(action, reviewId, entryId) {
     review.lastEditedAt = new Date().toISOString();
 
     setStored(reviewKey, reviews);
-    enqueueUpload("reviewReflection", { uploadId: makeUploadId(), action: "edit", ...review });
+    enqueueUpload("reviewReflection", reviewMetadata(review, "edit"));
     renderReviewHistoryForSelected(entryId);
     return;
   }
@@ -770,7 +770,7 @@ document.getElementById("saveReviewBtn").addEventListener("click", () => {
   const reviews = getStored(reviewKey);
   reviews.push(reviewRecord);
   setStored(reviewKey, reviews);
-  enqueueUpload("reviewReflection", { uploadId: makeUploadId(), action: "create", ...reviewRecord });
+  enqueueUpload("reviewReflection", reviewMetadata(reviewRecord, "create"));
   showCelebration("review");
   renderReviewHistoryForSelected(entry.entryId);
 });
@@ -780,6 +780,30 @@ function escapeHtml(text) {
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
+}
+
+// Word count used for length-only metadata (so private free text is never uploaded).
+function countWords(text) {
+  return String(text || "").trim().split(/\s+/).filter(Boolean).length;
+}
+
+// Build the upload/export shape for a later reflection: metadata + word counts ONLY.
+// The free-text fields (newThoughtsOrInsights, nextSmallStep) are treated as private
+// journal content — they stay in this browser and are never placed in this object.
+function reviewMetadata(review, action) {
+  return {
+    uploadId: makeUploadId(),
+    action,
+    reviewId: review.reviewId,
+    timestamp: review.timestamp,
+    participantId: review.participantId,
+    reviewedEntryId: review.reviewedEntryId,
+    reviewedEntryTime: review.reviewedEntryTime,
+    noticedPattern: review.noticedPattern,
+    newThoughtsLength: countWords(review.newThoughtsOrInsights),
+    nextStepLength: countWords(review.nextSmallStep),
+    lastEditedAt: review.lastEditedAt || ""
+  };
 }
 
 function toCSV(rows) {
@@ -813,7 +837,8 @@ document.getElementById("downloadMyMetadataBtn").addEventListener("click", () =>
 });
 
 document.getElementById("downloadMyReviewsBtn").addEventListener("click", () => {
-  const rows = currentParticipantRows(getStored(reviewKey));
+  // Export length only — the later-reflection free text stays private on the device.
+  const rows = currentParticipantRows(getStored(reviewKey)).map(r => reviewMetadata(r, "export"));
   downloadCSV(`review_reflections_${getParticipantId()}.csv`, rows);
 });
 
