@@ -139,8 +139,20 @@
             <label class="radio-inline"><input type="radio" name="eventFlag" value="Yes" /> Yes</label>
           </fieldset>
 
-          <label>Optional keyword for this event
-            <input id="eventKeyword" type="text" placeholder="e.g., deadline, feedback, meeting" />
+          <label>Type of event (optional)
+            <select id="eventKeyword">
+              <option value="">Not specified</option>
+              <option>Deadline</option>
+              <option>Exam</option>
+              <option>Feedback</option>
+              <option>Meeting</option>
+              <option>Presentation</option>
+              <option>Coursework</option>
+              <option>Social</option>
+              <option>Health</option>
+              <option>Other</option>
+              <option>Prefer not to say</option>
+            </select>
           </label>
 
           <button id="getModeBtn" class="primary">Get suggested mode</button>
