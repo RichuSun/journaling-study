@@ -83,7 +83,7 @@ function canonicalParticipantId(input) {
 const SHEETS_CONFIG = {
   // Paste your deployed Apps Script Web App URL between the quotes.
   // Leave empty ("") to keep the app fully local (CSV export still works).
-  endpointUrl: "https://script.google.com/macros/s/AKfycbxF9Y9x3dil-zEgFhQpxpsPw0U94zEz7Mk55NtahsRGXwFhfWMxuuNYkB18DiLnFt3ewg/exec",
+  endpointUrl: "https://script.google.com/macros/s/AKfycbwhvq_RPh4Ygdrfut-iDfcPWntvM7u584hOqEt8WEsyEZTXMCZrffW8wqU5BZBHmXWXng/exec",
   // Optional shared secret. If set, it must match SHARED_SECRET in the Apps Script.
   sharedSecret: ""
 };
